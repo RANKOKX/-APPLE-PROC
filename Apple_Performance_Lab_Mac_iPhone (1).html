@@ -1,0 +1,195 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#17181b">
+<title>Apple Performance Lab</title>
+<style>
+:root{color-scheme:dark;--bg:#17181b;--panel:rgba(43,45,49,.72);--panel2:#25272b;--text:#f3f3f4;--muted:#a6a8ad;--line:rgba(255,255,255,.12);--blue:#8da9ff;--cyan:#a5d8ff;--purple:#b6a1ff;--green:#c8d8cf;--amber:#d7c9a8;--red:#d8aeb2}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:radial-gradient(ellipse at 12% -8%,#343b4a 0,transparent 42%),radial-gradient(ellipse at 92% 8%,#302b40 0,transparent 36%),var(--bg);color:var(--text);font:15px/1.55 -apple-system,BlinkMacSystemFont,"SF Pro Text","Helvetica Neue",Arial,sans-serif;min-height:100vh}
+main{max-width:1000px;margin:auto;padding:clamp(16px,4vw,36px) clamp(13px,3vw,28px) 50px}
+header{display:flex;justify-content:space-between;align-items:center;gap:14px;margin-bottom:28px}
+.brand{display:flex;align-items:center;gap:12px}
+.logo{width:44px;height:44px;border-radius:14px;display:grid;place-items:center;background:linear-gradient(145deg,#777b82,#42454b);color:#fff;font-size:23px;font-weight:800;box-shadow:inset 0 1px 0 #ffffff55,0 5px 18px #0003;border:1px solid #ffffff20}
+.eyebrow{font-size:11px;text-transform:uppercase;letter-spacing:.14em;color:#c4c7cc;font-weight:750}
+.version{border:1px solid var(--line);border-radius:999px;padding:7px 11px;color:var(--muted);font-size:12px;white-space:nowrap;background:#ffffff07}
+.hero{padding:clamp(22px,5vw,42px);border:1px solid #ffffff17;border-radius:26px;background:linear-gradient(145deg,rgba(73,83,105,.34),rgba(34,36,43,.64));box-shadow:0 16px 42px #0002,inset 0 1px 0 #ffffff13;position:relative;overflow:hidden;margin-bottom:18px;backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px)}
+.hero:after{content:"";position:absolute;width:240px;height:240px;border-radius:50%;right:-110px;top:-130px;border:1px solid #ffffff18;box-shadow:0 0 0 24px #ffffff05,0 0 0 50px #ffffff03;pointer-events:none}
+h1{font-size:clamp(31px,6vw,54px);line-height:1.04;letter-spacing:-.045em;margin:10px 0 14px;max-width:700px}
+.gradient{background:linear-gradient(100deg,#f4f6ff 0%,#a5d8ff 48%,#b6a1ff 100%);-webkit-background-clip:text;background-clip:text;color:transparent}
+.lead{max-width:680px;color:#c0c1c5;font-size:16px;margin:0}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:22px}
+.chip{font-size:12px;color:#d9dade;border:1px solid var(--line);border-radius:999px;padding:6px 10px;background:#ffffff08}
+.grid{display:grid;grid-template-columns:minmax(0,1fr);gap:18px;max-width:820px;margin:0 auto}
+.card{border:1px solid #ffffff13;border-radius:21px;background:var(--panel);backdrop-filter:blur(24px) saturate(115%);-webkit-backdrop-filter:blur(24px) saturate(115%);padding:clamp(17px,3vw,25px);box-shadow:0 10px 30px #0002,inset 0 1px 0 #ffffff0a;margin-bottom:18px}
+.section-title{font-size:17px;font-weight:700;letter-spacing:-.02em;margin:0 0 5px}
+.muted{color:var(--muted)}.small{font-size:12px}.field{margin-top:17px}
+label{display:block;color:#c8c9cd;font-size:12px;font-weight:650;margin-bottom:7px}
+select,input{width:100%;border:1px solid #ffffff20;border-radius:12px;padding:13px 14px;background:rgba(24,25,28,.72);color:var(--text);font:inherit;outline:none}
+select:focus,input:focus{border-color:#b9bdc4;box-shadow:0 0 0 3px #ffffff10}
+.device-switch{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:18px}
+.device-btn{border:1px solid #ffffff18;background:#222428a8;color:#c0c2c6;border-radius:13px;padding:13px;font:inherit;font-weight:700;cursor:pointer;transition:background .15s,border-color .15s}
+.device-btn.active{background:linear-gradient(145deg,#686b71a8,#3c3e43c9);border-color:#ffffff45;color:#fff;box-shadow:inset 0 1px 0 #ffffff22}
+.specs{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;margin-top:17px}
+.spec{border:1px solid #ffffff13;border-radius:13px;padding:11px;background:#ffffff04}
+.spec strong{display:block;font-size:16px}.spec span{display:block;color:var(--muted);font-size:11px}
+.button{border:1px solid #ffffff20;border-radius:13px;padding:15px 18px;font:inherit;font-weight:700;color:#fff;background:linear-gradient(180deg,#777a80,#55585e);cursor:pointer;width:100%;margin-top:20px;box-shadow:inset 0 1px 0 #ffffff38,0 5px 16px #0002;transition:transform .15s,filter .15s}
+.button:hover{filter:brightness(1.08)}.button:active{transform:scale(.99)}.button:disabled{opacity:.45;cursor:not-allowed}
+.secondary{background:#ffffff08;color:#e0e1e4;border:1px solid #ffffff20;box-shadow:inset 0 1px 0 #ffffff0a}
+.note{border:1px solid #ffffff17;background:#ffffff06;border-radius:12px;padding:12px 13px;color:#c3c4c8;font-size:12px;margin-top:15px}
+#progressCard[hidden],#results[hidden]{display:none}
+.progress-top{display:flex;justify-content:space-between;gap:10px;font-weight:700}
+.track{height:8px;background:#ffffff13;border-radius:99px;overflow:hidden;margin:14px 0}
+.track span{display:block;height:100%;width:0;background:linear-gradient(90deg,#b5b8be,#e1e2e4);transition:width .25s}
+.test-list{display:grid;gap:9px;margin-top:16px}
+.testline{display:flex;justify-content:space-between;gap:10px;border-top:1px solid var(--line);padding-top:9px;color:var(--muted);font-size:13px}
+.testline b{color:var(--text);font-weight:600}
+.scorebox{display:flex;align-items:center;gap:22px;flex-wrap:wrap}
+.score{font-size:clamp(54px,10vw,78px);font-weight:800;letter-spacing:-.07em;line-height:1;color:#f0f0f2}
+.scorecaption{color:var(--muted);font-size:12px}.verdict{font-size:18px;font-weight:750;margin-top:12px}
+.metric-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:22px}
+.metric{border:1px solid #ffffff13;border-radius:14px;padding:14px;background:#ffffff04;min-width:0}
+.metric .name{color:var(--muted);font-size:12px;display:flex;align-items:center;gap:6px}.help{display:inline-grid;place-items:center;width:16px;height:16px;border-radius:50%;border:1px solid #ffffff35;color:#c9d4ed;font-size:10px;font-weight:750;line-height:1;cursor:help;flex:0 0 auto}.resultrow .help{vertical-align:middle;margin-left:4px}.metric .value{font-size:24px;font-weight:750;margin:3px 0}.metric .detail{font-size:11px;color:var(--muted)}
+.bar{height:5px;border-radius:99px;background:#ffffff12;overflow:hidden;margin-top:10px}.bar i{display:block;height:100%;width:0;background:linear-gradient(90deg,#8c9097,#d4d6da)}
+.resultrow{display:flex;justify-content:space-between;gap:12px;padding:12px 0;border-top:1px solid var(--line);font-size:13px}
+.resultrow span:first-child{color:var(--muted)}
+.pill{border-radius:999px;padding:3px 8px;font-size:11px;background:#ffffff0d;color:#d7d9dd;border:1px solid #ffffff14}
+footer{color:#818389;font-size:12px;text-align:center;padding:15px 5px 0}
+canvas{display:none}
+@media(max-width:760px){.grid{grid-template-columns:1fr}.hero{border-radius:22px}.card{border-radius:18px}.version{font-size:10px}.specs{grid-template-columns:repeat(3,1fr)}}
+@media(max-width:380px){.specs{grid-template-columns:1fr}.metric-grid{grid-template-columns:1fr}.logo{width:39px;height:39px}.version{display:none}}
+@media(prefers-reduced-transparency:reduce){.card,.hero{backdrop-filter:none;-webkit-backdrop-filter:none;background:#292b2f}}
+</style>
+</head>
+<body>
+<main>
+<header><div class="brand"><div class="logo">⌁</div><div><div class="eyebrow">Performance Lab</div><strong>APPLE / BENCHMARK</strong></div></div><div class="version">Design inspiré d’iOS 27</div></header>
+<section class="hero"><div class="eyebrow">Mesure locale · Sans installation</div><h1>Découvre ce que ton appareil<br><span class="gradient">peut vraiment donner.</span></h1><p class="lead">Une série de tests CPU, GPU, mémoire et stabilité, exécutés directement dans ton navigateur. Compare le résultat mesuré à une référence indicative du modèle choisi.</p><div class="chips"><span class="chip">CPU mono & multicœur</span><span class="chip">GPU WebGL</span><span class="chip">Mémoire</span><span class="chip">Stabilité prolongée</span></div></section>
+<div class="grid">
+<section class="card">
+<h2 class="section-title">01 — Configure ton appareil</h2><p class="muted small">Sélectionne le modèle que tu es en train de tester. Le choix sert de référence indicative, il ne modifie pas les capacités physiques de l’appareil.</p>
+<div class="device-switch"><button class="device-btn active" id="macBtn" type="button">▱ &nbsp; Mac</button><button class="device-btn" id="phoneBtn" type="button">▯ &nbsp; iPhone</button></div>
+<div class="field"><label for="model">Modèle de référence</label><select id="model"></select></div>
+<div class="field"><label for="mode">Intensité du test</label><select id="mode"><option value="standard">Équilibré · environ 25–35 s</option><option value="deep" selected>Approfondi · environ 50–65 s</option><option value="max">Maximum · environ 90–110 s</option></select></div>
+<div class="specs"><div class="spec"><strong id="chipSpec">—</strong><span>Puce</span></div><div class="spec"><strong id="cpuSpec">—</strong><span>CPU indicatif</span></div><div class="spec"><strong id="gpuSpec">—</strong><span>GPU indicatif</span></div></div>
+<button class="button" id="start">Lancer le benchmark approfondi ↗</button>
+<button class="button secondary" id="cancel" hidden>Arrêter le test</button>
+<div class="note">Conseil : ferme les applications lourdes et garde cette page au premier plan pendant le test.</div>
+</section>
+</div>
+<section class="card" id="progressCard" hidden><div class="progress-top"><span id="phase">Préparation du test…</span><span id="pct">0 %</span></div><div class="track"><span id="progress"></span></div><div class="test-list" id="testList"></div><p class="muted small" id="liveNote">Garde la page ouverte au premier plan pendant le test.</p></section>
+<section class="card" id="results" hidden>
+<div class="eyebrow">Rapport de session</div><div class="scorebox"><div><div class="score" id="score">—</div><div class="scorecaption">Indice vs référence sélectionnée</div></div><div><span class="pill" id="grade">Résultat</span><div class="verdict" id="verdict">—</div><p class="muted small" id="summary"></p></div></div>
+<div class="metric-grid">
+<div class="metric"><div class="name">CPU mono-cœur <span class="help" tabindex="0" role="note" title="Mesure la vitesse d’un seul cœur pour exécuter des calculs.">?</span></div><div class="value" id="single">—</div><div class="detail" id="singleDetail">Opérations par seconde</div><div class="bar"><i id="singleBar"></i></div></div>
+<div class="metric"><div class="name">CPU multicœur <span class="help" tabindex="0" role="note" title="Mesure le travail réalisé en parallèle sur plusieurs threads.">?</span></div><div class="value" id="multi">—</div><div class="detail" id="multiDetail">Débit combiné</div><div class="bar"><i id="multiBar"></i></div></div>
+<div class="metric"><div class="name">GPU WebGL <span class="help" tabindex="0" role="note" title="Mesure la capacité graphique via des shaders exécutés dans le navigateur.">?</span></div><div class="value" id="gpu">—</div><div class="detail" id="gpuDetail">Images calculées / seconde</div><div class="bar"><i id="gpuBar"></i></div></div>
+<div class="metric"><div class="name">Copie mémoire <span class="help" tabindex="0" role="note" title="Estime le débit de copie des données en mémoire de travail.">?</span></div><div class="value" id="memory">—</div><div class="detail">Go/s estimés, mémoire de travail</div><div class="bar"><i id="memoryBar"></i></div></div>
+</div>
+<div style="margin-top:22px"><div class="resultrow"><span>Stabilité CPU <span class="help" tabindex="0" role="note" title="Indique à quel point les performances CPU restent régulières pendant le test.">?</span></span><b id="cpuStability">—</b></div><div class="resultrow"><span>Stabilité GPU <span class="help" tabindex="0" role="note" title="Indique à quel point les performances graphiques restent régulières pendant le test.">?</span></span><b id="gpuStability">—</b></div><div class="resultrow"><span>Progression CPU (début → fin) <span class="help" tabindex="0" role="note" title="Compare les performances vers la fin du test au pic observé.">?</span></span><b id="cpuDrop">—</b></div><div class="resultrow"><span>Capacités détectées par le navigateur</span><b id="browserInfo">—</b></div></div>
+<p class="muted small" id="caveat" style="margin-top:15px"></p><button class="button secondary" id="again">Relancer un test</button>
+</section>
+<footer>Apple Performance Lab · Mesures locales, sans envoi de données · Les références sont indicatives et doivent être calibrées avec des appareils réels.</footer>
+</main>
+<script>
+"use strict";
+const $=id=>document.getElementById(id);
+const models={
+ Mac:[
+  {name:"MacBook Neo",chip:"A18 Pro",cpu:6,gpu:5,ram:8,ref:1.0},
+  {name:"MacBook Air M1 (2020)",chip:"Apple M1",cpu:8,gpu:7,ram:8,ref:1.05},
+  {name:"MacBook Air M2 (2022)",chip:"Apple M2",cpu:8,gpu:10,ram:8,ref:1.17},
+  {name:"MacBook Air M3 (2024)",chip:"Apple M3",cpu:8,gpu:10,ram:8,ref:1.28},
+  {name:"MacBook Air M4 (2025)",chip:"Apple M4",cpu:10,gpu:10,ram:16,ref:1.48},
+  {name:"MacBook Pro M1 Pro",chip:"Apple M1 Pro",cpu:10,gpu:16,ram:16,ref:1.65},
+  {name:"MacBook Pro M2 Pro",chip:"Apple M2 Pro",cpu:12,gpu:19,ram:16,ref:1.85},
+  {name:"MacBook Pro M3 Pro",chip:"Apple M3 Pro",cpu:12,gpu:18,ram:18,ref:2.05},
+  {name:"MacBook Pro M4 Pro",chip:"Apple M4 Pro",cpu:14,gpu:20,ram:24,ref:2.4},
+  {name:"MacBook Pro M4 Max",chip:"Apple M4 Max",cpu:16,gpu:40,ram:36,ref:3.25},
+  {name:"MacBook Pro M5",chip:"Apple M5",cpu:10,gpu:10,ram:16,ref:1.72}
+ ],
+ iPhone:[
+  {name:"iPhone 12",chip:"A14 Bionic",cpu:6,gpu:4,ram:4,ref:.72},
+  {name:"iPhone 13",chip:"A15 Bionic",cpu:6,gpu:4,ram:4,ref:.82},
+  {name:"iPhone 13 Pro",chip:"A15 Bionic",cpu:6,gpu:5,ram:6,ref:.88},
+  {name:"iPhone 14",chip:"A15 Bionic",cpu:6,gpu:5,ram:6,ref:.9},
+  {name:"iPhone 14 Pro",chip:"A16 Bionic",cpu:6,gpu:5,ram:6,ref:.98},
+  {name:"iPhone 15",chip:"A16 Bionic",cpu:6,gpu:5,ram:6,ref:1.04},
+  {name:"iPhone 15 Pro",chip:"A17 Pro",cpu:6,gpu:6,ram:8,ref:1.17},
+  {name:"iPhone 16",chip:"A18",cpu:6,gpu:5,ram:8,ref:1.22},
+  {name:"iPhone 16 Pro",chip:"A18 Pro",cpu:6,gpu:6,ram:8,ref:1.32},
+  {name:"iPhone 17",chip:"A19",cpu:6,gpu:5,ram:8,ref:1.43},
+  {name:"iPhone 17 Pro",chip:"A19 Pro",cpu:6,gpu:6,ram:12,ref:1.58}
+ ]
+};
+let family="Mac",running=false,stopRequested=false;
+const modes={standard:{single:1800,multi:6500,gpu:4000,mem:650,stability:1800},deep:{single:3000,multi:12000,gpu:8000,mem:900,stability:5000},max:{single:4500,multi:22000,gpu:14000,mem:1200,stability:9000}};
+function current(){return models[family][+$("model").value]||models[family][0]}
+function fillModels(){const old=$("model").value;$("model").innerHTML=models[family].map((m,i)=>`<option value="${i}">${m.name}</option>`).join("");if([...$("model").options].some(o=>o.value===old))$("model").value=old;updateSpecs()}
+function updateSpecs(){const m=current();$("chipSpec").textContent=m.chip;$("cpuSpec").textContent=m.cpu+" cœurs";$("gpuSpec").textContent=m.gpu+" cœurs"}
+function setFamily(f){family=f;$("macBtn").classList.toggle("active",f==="Mac");$("phoneBtn").classList.toggle("active",f==="iPhone");fillModels()}
+$("macBtn").onclick=()=>setFamily("Mac");$("phoneBtn").onclick=()=>setFamily("iPhone");$("model").onchange=updateSpecs;
+fillModels();
+const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+const mean=a=>a.length?a.reduce((s,x)=>s+x,0)/a.length:0;
+const stability=a=>a.length>2?Math.min(100,mean(a.slice(-Math.max(2,Math.floor(a.length/3))))/Math.max(...a)*100):null;
+function workerSource(){return `onmessage=e=>{const duration=e.data;let x=1.0001,n=0,last=performance.now(),end=last+duration;const out=[];while(performance.now()<end){for(let j=0;j<12000;j++){x=Math.sin(x)*Math.cos(x)+Math.sqrt(x*x+1.5);n+=1}let now=performance.now();if(now-last>=350){out.push(n/((now-last)/1000));n=0;last=now}}postMessage(out)}`}
+let workerURL=null;try{workerURL=URL.createObjectURL(new Blob([workerSource()],{type:"text/javascript"}))}catch(e){}
+function cpuTest(duration,count){return new Promise((resolve,reject)=>{if(!workerURL||!window.Worker){reject(Error("Workers indisponibles"));return}const ws=[],all=[];let ended=0,failed=false;const timer=setTimeout(()=>fail(Error("Délai dépassé")),duration+5000);function fail(e){if(failed)return;failed=true;clearTimeout(timer);ws.forEach(w=>w.terminate());reject(e)}try{for(let i=0;i<count;i++){const w=new Worker(workerURL);ws.push(w);w.onmessage=e=>{all[i]=e.data;w.terminate();if(++ended===count&&!failed){clearTimeout(timer);const len=Math.min(...all.map(a=>a.length));const sums=[];for(let j=0;j<len;j++)sums.push(all.reduce((s,a)=>s+a[j],0));resolve({series:sums,raw:all.flat()})}};w.onerror=()=>fail(Error("Worker interrompu"));w.postMessage(duration)}}catch(e){fail(e)}})}
+async function cpuMain(duration){let x=1.0001,n=0,last=performance.now(),end=last+duration,out=[];while(performance.now()<end&&!stopRequested){const slice=performance.now()+40;while(performance.now()<slice){for(let j=0;j<8000;j++){x=Math.sin(x)*Math.cos(x)+Math.sqrt(x*x+1.5);n++}}const now=performance.now();if(now-last>=350){out.push(n/((now-last)/1000));n=0;last=now}await sleep(0)}return out}
+function gpuTest(duration){return new Promise(resolve=>{let gl,canvas;try{canvas=document.createElement("canvas");canvas.width=canvas.height=256;gl=canvas.getContext("webgl2",{antialias:false,depth:false,stencil:false,preserveDrawingBuffer:false})||canvas.getContext("webgl",{antialias:false,depth:false,stencil:false,preserveDrawingBuffer:false});if(!gl){resolve({series:[],supported:false});return}
+const vs=`attribute vec2 p;void main(){gl_Position=vec4(p,0.,1.);}`;
+const fs=`precision highp float;uniform float t;void main(){vec2 u=gl_FragCoord.xy/256.0;float v=0.0;for(int i=0;i<180;i++){float fi=float(i);v+=sin(u.x*fi+t)*cos(u.y*fi-t)*0.5+0.5;}gl_FragColor=vec4(vec3(fract(v*0.01)),1.0);}`;
+function shader(type,src){const s=gl.createShader(type);gl.shaderSource(s,src);gl.compileShader(s);if(!gl.getShaderParameter(s,gl.COMPILE_STATUS))throw Error("Compilation shader");return s}
+const pgr=gl.createProgram();gl.attachShader(pgr,shader(gl.VERTEX_SHADER,vs));gl.attachShader(pgr,shader(gl.FRAGMENT_SHADER,fs));gl.linkProgram(pgr);if(!gl.getProgramParameter(pgr,gl.LINK_STATUS))throw Error("Lien shader");gl.useProgram(pgr);const b=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,b);gl.bufferData(gl.ARRAY_BUFFER,new Float32Array([-1,-1,1,-1,-1,1,1,1]),gl.STATIC_DRAW);const loc=gl.getAttribLocation(pgr,"p");gl.enableVertexAttribArray(loc);gl.vertexAttribPointer(loc,2,gl.FLOAT,false,0,0);const tu=gl.getUniformLocation(pgr,"t");let start=performance.now(),last=start,frames=0,series=[];function frame(){if(stopRequested){gl.getExtension("WEBGL_lose_context")?.loseContext();resolve({series,supported:true});return}try{const now=performance.now();gl.uniform1f(tu,now/1000);for(let k=0;k<4;k++)gl.drawArrays(gl.TRIANGLE_STRIP,0,4);frames+=4;gl.flush();if(now-last>=500){series.push(frames/((now-last)/1000));frames=0;last=now}if(now-start<duration){requestAnimationFrame(frame)}else{gl.getExtension("WEBGL_lose_context")?.loseContext();resolve({series,supported:true})}}catch(e){resolve({series,supported:true})}}requestAnimationFrame(frame)}catch(e){resolve({series:[],supported:false})}})}
+function memTest(duration){const n=1_000_000;let a,b;try{a=new Float64Array(n);b=new Float64Array(n);a.fill(1.2345)}catch(e){return {gbps:null,loops:0}}let t=performance.now(),loops=0,checksum=0;while(performance.now()-t<duration&&!stopRequested){b.set(a);checksum+=b[(loops*997)%n];loops++}const sec=(performance.now()-t)/1000;window.__benchChecksum=checksum;return {gbps:sec>0?loops*n*8*2/sec/1e9:0,loops}}
+function setProgress(label,p){$("phase").textContent=label;$("pct").textContent=Math.round(p)+" %";$("progress").style.width=p+"%"}
+function showTests(items){$("testList").innerHTML=items.map(([a,b])=>`<div class="testline"><span>${a}</span><b>${b}</b></div>`).join("")}
+function median(a){if(!a.length)return null;const s=[...a].sort((x,y)=>x-y);return s[Math.floor(s.length/2)]}
+function putMetric(id,value,detail,percent){$(id).textContent=value;$(id+"Detail").textContent=detail;$("".concat(id,"Bar")).style.width=Math.max(0,Math.min(100,percent||0))+"%"}
+function refScores(m){/* Références heuristiques, non calibrées en laboratoire. */return {single:1.8e6*m.ref,multi:1.8e6*m.ref*(m.cpu*.67),gpu:900*m.ref*(m.gpu/5),memory:5.5*m.ref}}
+$("start").onclick=async()=>{
+ if(running)return;running=true;stopRequested=false;const m=current(),cfg=modes[$("mode").value],refs=refScores(m);$("start").disabled=true;$("cancel").hidden=false;$("progressCard").hidden=false;$("results").hidden=true;showTests([["Initialisation","En cours…"]]);
+ const notes=[];let single=null,multi=null,gpu=null,mem=null;
+ const step=async(label,p,fn)=>{setProgress(label,p);try{return await fn()}catch(e){notes.push(label+": "+e.message);return null}};
+ try{
+  setProgress("1/5 · CPU mono-cœur",3);showTests([["CPU mono-cœur","En cours…"],["CPU multicœur","En attente"],["GPU WebGL","En attente"],["Mémoire","En attente"],["Stabilité","En attente"]]);
+  let r=await step("1/5 · CPU mono-cœur",5,()=>cpuTest(cfg.single,1));single=r?.series?.length?median(r.series):null;
+  if(single===null){const s=await cpuMain(Math.min(cfg.single,3000));single=median(s);notes.push("CPU mono mesuré sur le thread principal (pas de workers)")}
+  showTests([["CPU mono-cœur",single?Math.round(single).toLocaleString("fr-FR")+" ops/s":"Indisponible"],["CPU multicœur","En attente"],["GPU WebGL","En attente"],["Mémoire","En attente"],["Stabilité","En attente"]]);
+  if(stopRequested)throw Error("Test arrêté par l’utilisateur");
+  setProgress("2/5 · CPU multicœur — charge soutenue",25);let rm=await step("2/5 · CPU multicœur",25,()=>cpuTest(cfg.multi,m.cpu));multi=rm?.series?.length?rm.series:null;
+  if(!multi){notes.push("Test multicœur incomplet");}
+  showTests([["CPU mono-cœur",single?Math.round(single).toLocaleString("fr-FR")+" ops/s":"—"],["CPU multicœur",multi?"Mesuré":"Non mesuré"],["GPU WebGL","En attente"],["Mémoire","En attente"],["Stabilité","En attente"]]);
+  if(stopRequested)throw Error("Test arrêté par l’utilisateur");
+  setProgress("3/5 · GPU WebGL — shaders",52);let rg=await step("3/5 · GPU WebGL",52,()=>gpuTest(cfg.gpu));gpu=rg?.series?.length?rg.series:null;if(rg&&!rg.supported)notes.push("WebGL indisponible dans ce navigateur");
+  if(stopRequested)throw Error("Test arrêté par l’utilisateur");
+  setProgress("4/5 · Débit mémoire",72);let rmem=await step("4/5 · Mémoire",72,async()=>{await sleep(20);return memTest(cfg.mem)});mem=rmem?.gbps??null;
+  if(stopRequested)throw Error("Test arrêté par l’utilisateur");
+  setProgress("5/5 · Stabilité et maintien des performances",86);const stabEnd=performance.now()+cfg.stability;let stabilitySeries=[];while(performance.now()<stabEnd&&!stopRequested){let r0=await cpuTest(600,Math.min(m.cpu,4)).catch(()=>null);if(r0?.series?.length)stabilitySeries.push(median(r0.series));setProgress("5/5 · Stabilité — charge prolongée",86+12*Math.min(1,(performance.now()-(stabEnd-cfg.stability))/cfg.stability));}
+  if(stopRequested)throw Error("Test arrêté par l’utilisateur");
+  const sStab=stability(stabilitySeries.length?stabilitySeries:multi||[]),gStab=stability(gpu||[]),cpuEnd=multi?.length?((mean(multi.slice(-Math.max(2,Math.floor(multi.length/3))))/Math.max(...multi))*100):sStab;
+  const raw={single:single?single/refs.single*100:null,multi:multi?.length?Math.max(...multi)/refs.multi*100:null,gpu:gpu?.length?mean(gpu)/refs.gpu*100:null,memory:mem!==null?mem/refs.memory*100:null};
+  const components=[raw.single,raw.multi,raw.gpu,raw.memory].filter(v=>v!==null&&Number.isFinite(v));const total=components.length?Math.round(components.reduce((a,b)=>a+b,0)/components.length):null;
+  $("score").textContent=total===null?"N/A":total+" %";$("grade").textContent=total===null?"Mesure incomplète":total>=110?"Au-dessus de la référence":total>=90?"Proche de la référence":"Sous la référence";
+  $("verdict").textContent=total===null?"Impossible d’établir un indice fiable":total>=110?"Résultat supérieur à la référence":total>=90?"Résultat proche de la référence":"Résultat inférieur à la référence";
+  $("summary").textContent="Référence sélectionnée : "+m.name+". Les références numériques sont des estimations initiales, pas des résultats Apple certifiés.";
+  putMetric("single",single?Math.round(single).toLocaleString("fr-FR"):"N/A","opérations/s · indice "+(raw.single===null?"N/A":Math.round(raw.single)+" %"),raw.single);
+  putMetric("multi",multi?Math.round(mean(multi)).toLocaleString("fr-FR"):"N/A","ops/s combinées · indice "+(raw.multi===null?"N/A":Math.round(raw.multi)+" %"),raw.multi);
+  putMetric("gpu",gpu?Math.round(mean(gpu)).toLocaleString("fr-FR"):"N/A","passes shader/s · indice "+(raw.gpu===null?"N/A":Math.round(raw.gpu)+" %"),raw.gpu);
+  putMetric("memory",mem===null?"N/A":mem.toFixed(2),"Go/s · indice "+(raw.memory===null?"N/A":Math.round(raw.memory)+" %"),raw.memory);
+  $("cpuStability").textContent=sStab===null?"Non mesurée":Math.round(sStab)+" %";$("gpuStability").textContent=gStab===null?"Non mesurée":Math.round(gStab)+" %";$("cpuDrop").textContent=cpuEnd===null?"Non mesuré":Math.round(cpuEnd)+" % du pic";$("browserInfo").textContent=(navigator.hardwareConcurrency||"?")+" threads annoncés · "+(glLabel());
+  $("caveat").textContent="Limites : "+(notes.length?notes.join(" ; ")+". ":"")+"Le navigateur peut limiter les workers, les shaders et la mémoire. Le nombre de threads annoncé n’est pas nécessairement le nombre de cœurs physiques. Les références sont heuristiques et non calibrées en laboratoire : compare surtout les mesures brutes sur le même navigateur, dans des conditions identiques. Aucun accès direct à la température ou à la fréquence CPU/GPU.";
+  $("progressCard").hidden=false;setProgress("Test terminé",100);$("results").hidden=false;
+ }catch(e){$("phase").textContent=e.message||"Test interrompu";$("liveNote").textContent="Tu peux relancer le test après quelques instants."}
+ finally{running=false;$("start").disabled=false;$("cancel").hidden=true;$("start").textContent="Relancer le benchmark ↗"}
+};
+function glLabel(){try{const c=document.createElement("canvas"),g=c.getContext("webgl2")||c.getContext("webgl");return g?(g instanceof WebGL2RenderingContext?"WebGL 2":"WebGL 1"):"WebGL indisponible"}catch(e){return"WebGL inconnu"}}
+$("cancel").onclick=()=>{stopRequested=true;$("cancel").disabled=true;$("liveNote").textContent="Arrêt en cours…";setTimeout(()=>$("cancel").disabled=false,300)};
+$("again").onclick=()=>{$("results").hidden=true;$("progressCard").hidden=true;window.scrollTo({top:0,behavior:"smooth"})};
+</script>
+</body>
+</html>
