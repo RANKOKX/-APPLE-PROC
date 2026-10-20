@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Test de performance MacBook</title>
+<style>
+:root{--bg:#eef1f4;--card:#fff;--ink:#14181d;--mut:#667180;--acc:#0a63ff;--ok:#12a150;--mid:#e08a00;--bad:#d92d3a;--line:#d8dee5}
+@media(prefers-color-scheme:dark){:root{--bg:#101316;--card:#181c21;--ink:#eef1f4;--mut:#93a0ae;--line:#2a313a}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 -apple-system,"SF Pro Text",Helvetica,Arial,sans-serif;padding:24px 16px 60px}
+main{max-width:620px;margin:0 auto}
+h1{font-size:28px;margin:0 0 4px;letter-spacing:-.02em}
+p.sub{color:var(--mut);margin:0 0 20px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px;margin-bottom:16px}
+label{display:block;font-size:13px;color:var(--mut);margin:12px 0 4px}
+label:first-child{margin-top:0}
+select{width:100%;padding:11px;font-size:16px;border-radius:9px;border:1px solid var(--line);background:var(--bg);color:var(--ink)}
+select:disabled{opacity:.45}
+select:focus,button:focus-visible{outline:2px solid var(--acc);outline-offset:1px}
+button{width:100%;padding:14px;font-size:17px;font-weight:600;border:0;border-radius:10px;background:var(--acc);color:#fff;cursor:pointer;margin-top:16px}
+button:disabled{opacity:.4;cursor:not-allowed}
+#recap{font-size:14px;color:var(--mut);margin-top:12px}
+#recap b{color:var(--ink)}
+.bar{height:10px;border-radius:5px;background:var(--line);overflow:hidden;margin:8px 0}
+.bar i{display:block;height:100%;width:0;background:var(--acc);transition:width .3s}
+#big{font-size:64px;font-weight:700;letter-spacing:-.03em;line-height:1}
+.row{display:flex;justify-content:space-between;padding:9px 0;border-top:1px solid var(--line);font-size:15px}
+.row span:first-child{color:var(--mut)}
+.note{font-size:13px;color:var(--mut)}
+[hidden]{display:none!important}
+</style>
+</head>
+<body>
+<main>
+<h1>Test de performance MacBook</h1>
+<p class="sub">Choisis ta config dans l’ordre. Seules les combinaisons qui existent chez Apple sont proposées.</p>
+
+<div class="card">
+  <label for="fam">1. Modèle</label><select id="fam"></select>
+  <label for="size">2. Taille d’écran</label><select id="size" disabled></select>
+  <label for="chip">3. Puce</label><select id="chip" disabled></select>
+  <label for="cfg">4. Cœurs CPU / GPU</label><select id="cfg" disabled></select>
+  <label for="ram">5. Mémoire (RAM)</label><select id="ram" disabled></select>
+  <label for="ssd">6. Stockage (SSD)</label><select id="ssd" disabled></select>
+  <div id="recap"></div>
+  <button id="go" disabled>Lancer le test (≈ 15 s)</button>
+  <p class="note" style="margin-top:10px">Branche le chargeur, ferme les autres apps et désactive le mode économie d’énergie avant de lancer.</p>
+</div>
+
+<div class="card" id="run" hidden>
+  <div id="phase">Préparation…</div>
+  <div class="bar"><i id="prog"></i></div>
+</div>
+
+<div class="card" id="res" hidden>
+  <div id="big"></div>
+  <div id="verdict" style="font-size:19px;font-weight:600;margin:6px 0 12px"></div>
+  <div class="row"><span>Utilisation des cœurs</span><span id="r1"></span></div>
+  <div class="row"><span>Stabilité CPU (chaleur)</span><span id="r2"></span></div>
+  <div class="row"><span>Stabilité GPU</span><span id="r3"></span></div>
+  <div class="row"><span>Vitesse mémoire</span><span id="r4"></span></div>
+  <p class="note" id="info" style="margin-top:12px"></p>
+  <p class="note">Le navigateur ne peut pas lire le score officiel d’Apple. Le pourcentage mesure si ta machine délivre toute la puissance de sa config (cœurs bien utilisés, pas de throttling). 100 % = elle tient son maximum.</p>
+</div>
+</main>
+
+<script>
+/* ---- Base de données des configs MacBook réelles ----
+   p = nb de cœurs performance (le reste = cœurs efficacité) */
+const S=[256,512,1024,2048,4096,8192];
+const r=(a,b)=>S.filter(x=>x>=a&&x<=b);
+const DB={
+ "MacBook Neo":{chips:[
+  {n:"A18 Pro",sz:[13],cfg:[{c:6,g:5,p:2}],ram:[8],ssd:[256,512]}]},
+ "MacBook Air":{chips:[
+  {n:"M1 (2020)",sz:[13],cfg:[{c:8,g:7,p:4},{c:8,g:8,p:4}],ram:[8,16],ssd:r(256,2048)},
+  {n:"M2 (2022-23)",sz:[13,15],cfg:[{c:8,g:8,p:4,s:[13]},{c:8,g:10,p:4}],ram:[8,16,24],ssd:r(256,2048)},
+  {n:"M3 (2024)",sz:[13,15],cfg:[{c:8,g:8,p:4,s:[13]},{c:8,g:10,p:4}],ram:[8,16,24],ssd:r(256,2048)},
+  {n:"M4 (2025)",sz:[13,15],cfg:[{c:10,g:8,p:4,s:[13]},{c:10,g:10,p:4}],ram:[16,24,32],ssd:r(256,2048)}]},
+ "MacBook Pro":{chips:[
+  {n:"M1 Pro (2021)",sz:[14,16],cfg:[{c:8,g:14,p:6},{c:10,g:14,p:8},{c:10,g:16,p:8}],ram:[16,32],ssd:r(512,8192)},
+  {n:"M1 Max (2021)",sz:[14,16],cfg:[{c:10,g:24,p:8},{c:10,g:32,p:8}],ram:[32,64],ssd:r(512,8192)},
+  {n:"M2 Pro (2023)",sz:[14,16],cfg:[{c:10,g:16,p:6},{c:12,g:19,p:8}],ram:[16,32],ssd:r(512,8192)},
+  {n:"M2 Max (2023)",sz:[14,16],cfg:[{c:12,g:30,p:8},{c:12,g:38,p:8}],ram:[32,64,96],ssd:r(512,8192)},
+  {n:"M3 (2023)",sz:[14],cfg:[{c:8,g:10,p:4}],ram:[8,16,24],ssd:r(512,2048)},
+  {n:"M3 Pro (2023)",sz:[14,16],cfg:[{c:11,g:14,p:5},{c:12,g:18,p:6}],ram:[18,36],ssd:r(512,4096)},
+  {n:"M3 Max (2023)",sz:[14,16],cfg:[{c:14,g:30,p:10},{c:16,g:40,p:12}],ram:[36,48,64,96,128],ssd:r(1024,8192)},
+  {n:"M4 (2024)",sz:[14],cfg:[{c:10,g:10,p:4}],ram:[16,24,32],ssd:r(512,2048)},
+  {n:"M4 Pro (2024)",sz:[14,16],cfg:[{c:12,g:16,p:8},{c:14,g:20,p:10}],ram:[24,48],ssd:r(512,4096)},
+  {n:"M4 Max (2024)",sz:[14,16],cfg:[{c:14,g:32,p:10},{c:16,g:40,p:12}],ram:[36,48,64,128],ssd:r(1024,8192)},
+  {n:"M5 (2025)",sz:[14],cfg:[{c:10,g:10,p:4}],ram:[16,24,32],ssd:r(512,4096)}]}
+};
+const $=id=>document.getElementById(id);
+const fmtS=x=>x>=1024?(x/1024)+" To":x+" Go";
+const sel={fam:$("fam"),size:$("size"),chip:$("chip"),cfg:$("cfg"),ram:$("ram"),ssd:$("ssd")};
+function fill(el,items,ph){
+  el.innerHTML='<option value="">'+ph+'</option>'+items.map(([v,t])=>`<option value="${v}">${t}</option>`).join("");
+  el.disabled=!items.length;
+}
+function reset(from){
+  const order=["size","chip","cfg","ram","ssd"];
+  order.slice(order.indexOf(from)).forEach(k=>fill(sel[k],[],"—"));
+}
+const fam=()=>DB[sel.fam.value];
+const chip=()=>fam()&&fam().chips[sel.chip.value];
+const cfgsFor=()=>chip().cfg.filter(c=>!c.s||c.s.includes(+sel.size.value));
+fill(sel.fam,Object.keys(DB).map(k=>[k,k]),"Choisir");
+reset("size");
+sel.fam.onchange=()=>{reset("size");if(!sel.fam.value)return upd();
+  const sizes=[...new Set(fam().chips.flatMap(c=>c.sz))].sort((a,b)=>a-b);
+  fill(sel.size,sizes.map(s=>[s,s+" pouces"]),"Choisir");
+  if(sizes.length==1){sel.size.value=sizes[0];sel.size.onchange()}upd()};
+sel.size.onchange=()=>{reset("chip");if(!sel.size.value)return upd();
+  const s=+sel.size.value;
+  fill(sel.chip,fam().chips.map((c,i)=>[i,c.n,c.sz.includes(s)]).filter(x=>x[2]).map(x=>[x[0],x[1]]),"Choisir");
+  upd()};
+sel.chip.onchange=()=>{reset("cfg");if(sel.chip.value==="")return upd();
+  fill(sel.cfg,cfgsFor().map((c,i)=>[i,`${c.c} cœurs CPU / ${c.g} cœurs GPU`]),"Choisir");
+  if(cfgsFor().length==1){sel.cfg.value=0;sel.cfg.onchange()}upd()};
+sel.cfg.onchange=()=>{reset("ram");if(sel.cfg.value==="")return upd();
+  fill(sel.ram,chip().ram.map(x=>[x,x+" Go"]),"Choisir");upd()};
+sel.ram.onchange=()=>{reset("ssd");if(!sel.ram.value)return upd();
+  fill(sel.ssd,chip().ssd.map(x=>[x,fmtS(x)]),"Choisir");upd()};
+sel.ssd.onchange=upd;
+function cur(){
+  if(!sel.ssd.value)return null;
+  return {fam:sel.fam.value,size:sel.size.value,chip:chip(),cfg:cfgsFor()[sel.cfg.value],ram:sel.ram.value,ssd:sel.ssd.value};
+}
+function upd(){
+  const c=cur();$("go").disabled=!c;
+  $("recap").innerHTML=c?`<b>${c.fam} ${c.size}" ${c.chip.n}</b> · ${c.cfg.c} CPU (${c.cfg.p}P+${c.cfg.c-c.cfg.p}E) · ${c.cfg.g} GPU · ${c.ram} Go · ${fmtS(+c.ssd)}`:"";
+}
+
+/* ---- Tests ---- */
+const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+const clamp=x=>Math.max(0,Math.min(100,x));
+const avg=a=>a.reduce((s,x)=>s+x,0)/a.length;
+const workerSrc=`onmessage=e=>{const ms=e.data;let x=1.0001,end=performance.now()+ms,out=[],t=performance.now(),n=0;
+while(true){for(let i=0;i<20000;i++){x=Math.sin(x)*Math.cos(x)+Math.sqrt(x*x+1.5);}n+=20000;
+const now=performance.now();if(now-t>=500){out.push(n/(now-t)*1000);n=0;t=now}
+if(now>=end)break}postMessage(out)}`;
+let wurl=null,canWorkers=true;
+try{wurl=URL.createObjectURL(new Blob([workerSrc],{type:"text/javascript"}))}catch(e){canWorkers=false}
+if(typeof Worker==="undefined")canWorkers=false;
+
+function runWorkers(count,ms){
+  return new Promise((resolve,reject)=>{
+    const results=[],ws=[];let done=0,failed=false;
+    const timer=setTimeout(()=>fail(new Error("workers bloqués (délai dépassé)")),ms+4000);
+    function fail(e){
+      if(failed)return;failed=true;clearTimeout(timer);
+      ws.forEach(w=>{try{w.terminate()}catch(_){}});reject(e);
+    }
+    try{
+      for(let i=0;i<count;i++){
+        const w=new Worker(wurl);ws.push(w);
+        w.onerror=ev=>fail(new Error(ev.message||"worker bloqué par le navigateur"));
+        w.onmessage=e=>{
+          results.push(e.data);w.terminate();
+          if(++done===count&&!failed){
+            clearTimeout(timer);
+            resolve(results[0].map((_,k)=>results.reduce((s,a)=>s+(a[k]||0),0)));
+          }
+        };
+        w.postMessage(ms);
+      }
+    }catch(e){fail(e)}
+  });
+}
+/* Secours si les workers sont bloqués : un seul cœur, sur le thread principal */
+async function mainThread(ms){
+  const out=[];let x=1.0001,t=performance.now(),n=0;const end=t+ms;
+  while(true){
+    const slice=performance.now()+50;
+    while(performance.now()<slice){for(let i=0;i<20000;i++){x=Math.sin(x)*Math.cos(x)+Math.sqrt(x*x+1.5)}n+=20000}
+    const now=performance.now();
+    if(now-t>=500){out.push(n/(now-t)*1000);n=0;t=now}
+    if(now>=end)break;
+    await sleep(0);
+  }
+  window.__x=x;return out;
+}
+function gpuTest(ms){
+  return new Promise(res=>{
+    try{
+      const cv=document.createElement("canvas");cv.width=cv.height=256;
+      const gl=cv.getContext("webgl")||cv.getContext("experimental-webgl");
+      if(!gl)return res(null);
+      const vs="attribute vec2 p;void main(){gl_Position=vec4(p,0.,1.);}";
+      const fs="precision mediump float;uniform float t;void main(){vec2 u=gl_FragCoord.xy/256.;float v=0.;for(int i=0;i<120;i++){v+=sin(u.x*float(i)+t)*cos(u.y*float(i)-t);}gl_FragColor=vec4(vec3(v*.001),1.);}";
+      const sh=(ty,s)=>{const o=gl.createShader(ty);gl.shaderSource(o,s);gl.compileShader(o);
+        if(!gl.getShaderParameter(o,gl.COMPILE_STATUS))throw new Error("shader");return o};
+      const pr=gl.createProgram();
+      gl.attachShader(pr,sh(gl.VERTEX_SHADER,vs));gl.attachShader(pr,sh(gl.FRAGMENT_SHADER,fs));
+      gl.linkProgram(pr);gl.useProgram(pr);
+      const b=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,b);
+      gl.bufferData(gl.ARRAY_BUFFER,new Float32Array([-1,-1,1,-1,-1,1,1,1]),gl.STATIC_DRAW);
+      const l=gl.getAttribLocation(pr,"p");gl.enableVertexAttribArray(l);gl.vertexAttribPointer(l,2,gl.FLOAT,false,0,0);
+      const tu=gl.getUniformLocation(pr,"t"),px=new Uint8Array(4),out=[];
+      const start=performance.now();let t=start,n=0;
+      (function f(){
+        try{
+          for(let i=0;i<8;i++){gl.uniform1f(tu,performance.now()/1000);gl.drawArrays(gl.TRIANGLE_STRIP,0,4)}
+          gl.readPixels(0,0,1,1,gl.RGBA,gl.UNSIGNED_BYTE,px);n+=8;
+          const now=performance.now();
+          if(now-t>=500){out.push(n/(now-t)*1000);n=0;t=now}
+          if(now-start<ms)setTimeout(f,0);else res(out);
+        }catch(e){res(out.length?out:null)}
+      })();
+    }catch(e){res(null)}
+  });
+}
+function memTest(){
+  const a=new Float64Array(4e6),b=new Float64Array(4e6);a.fill(1);
+  const t=performance.now();let n=0;
+  while(performance.now()-t<1000){b.set(a);n++}
+  return n*4e6*8*2/((performance.now()-t)/1000)/1e9;
+}
+function stab(a){
+  if(!a||a.length<4)return null;
+  const peak=Math.max(...a);return clamp(avg(a.slice(-3))/peak*100);
+}
+function setP(txt,pct){$("phase").textContent=txt;$("prog").style.width=pct+"%"}
+const notes=[];
+async function safe(name,fn){
+  try{return await fn()}catch(e){notes.push(name+" : "+((e&&e.message)||e));return null}
+}
+
+$("go").onclick=async()=>{
+  const c=cur();if(!c)return;
+  notes.length=0;
+  $("go").disabled=true;$("res").hidden=true;$("run").hidden=false;
+  try{
+    setP("1/4 · Un seul cœur…",5);
+    const single=await safe("test 1 cœur",async()=>{
+      if(canWorkers){
+        try{return await runWorkers(1,2000)}
+        catch(e){canWorkers=false;notes.push("Workers bloqués par le navigateur : test limité à 1 cœur")}
+      }
+      return await mainThread(2000);
+    });
+    setP("2/4 · Tous les cœurs (chauffe)…",25);
+    let multi=null,cpuSeries=null;
+    if(canWorkers)multi=await safe("test multi-cœurs",()=>runWorkers(c.cfg.c,6500));
+    cpuSeries=multi||await safe("test CPU",()=>mainThread(6000));
+    setP("3/4 · Processeur graphique…",65);
+    const gpu=await safe("test GPU",()=>gpuTest(4000));
+    setP("4/4 · Mémoire…",90);
+    await sleep(50);
+    const mem=await safe("test mémoire",async()=>memTest());
+
+    let eff=null;
+    if(multi&&single){
+      const ratio=Math.max(...multi.slice(0,3))/Math.max(...single);
+      const expected=c.cfg.p+0.35*(c.cfg.c-c.cfg.p);
+      eff=clamp(ratio/expected*100);
+    }
+    const cpuStab=stab(cpuSeries),gpuStab=stab(gpu);
+    const parts=[eff,cpuStab,gpuStab].filter(x=>x!==null);
+    if(!parts.length)throw new Error("aucun test n’a pu s’exécuter dans ce navigateur");
+    const total=Math.round(avg(parts));
+    $("big").textContent=total+" %";
+    $("big").style.color=total>=95?"var(--ok)":total>=80?"var(--mid)":"var(--bad)";
+    $("verdict").textContent=total>=95?"Ton Mac est à son maximum de performance.":
+      total>=80?"Presque au maximum : un peu de marge perdue.":"Ton Mac est en dessous de son maximum.";
+    $("r1").textContent=eff===null?"non mesuré":Math.round(eff)+" %";
+    $("r2").textContent=cpuStab===null?"non mesuré":Math.round(cpuStab)+" %";
+    $("r3").textContent=gpuStab===null?"non mesuré (WebGL indisponible)":Math.round(gpuStab)+" %";
+    $("r4").textContent=mem===null?"non mesuré":mem.toFixed(1)+" Go/s";
+    const hc=navigator.hardwareConcurrency;
+    $("info").textContent=
+      (total<95?"Pistes : branche le chargeur, quitte les apps en arrière-plan, coupe le mode économie d’énergie, laisse refroidir 5 min puis relance. ":"")+
+      (hc&&hc!==c.cfg.c?`Le navigateur annonce ${hc} cœurs logiques au lieu de ${c.cfg.c} : vérifie ta config si le score cœurs est bas. `:"")+
+      (notes.length?"Problèmes rencontrés : "+notes.join(" ; ")+". Pour un test complet, ouvre le fichier directement dans Safari ou Chrome (pas dans un aperçu) ou depuis GitHub Pages.":"");
+    setP("Terminé",100);
+    $("res").hidden=false;
+  }catch(e){
+    $("phase").textContent="Erreur : "+((e&&e.message)||e)+(notes.length?" ("+notes.join(" ; ")+")":"");
+  }
+  $("go").disabled=false;
+};
+</script>
+</body>
+</html>
